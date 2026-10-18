@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTagDto } from './dto/create-tag.dto.js';
 import { UpdateTagDto } from './dto/update-tag.dto.js';
 import { InjectModel } from '@nestjs/mongoose';
 import { Tag } from './entities/tag.entity.js';
 import { Model } from 'mongoose';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class TagsService {
@@ -12,7 +13,7 @@ export class TagsService {
     private readonly tagModel: Model<Tag>,
   ) {}
 
-  create(createTagDto: CreateTagDto) {
+  async create(createTagDto: CreateTagDto) {
     return this.tagModel.create({
       ...createTagDto,
       createdAt: new Date(),
@@ -21,19 +22,23 @@ export class TagsService {
     });
   }
 
-  findAll() {
-    return `This action returns all tags`;
+  async findAll() {
+    return this.tagModel.find({ isDeleted: false }).exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} tag`;
+  async findOne(id: string) {
+    const tag = await this.tagModel.findById(id);
+    if (!tag || tag.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+    return tag;
   }
 
-  update(id: number, updateTagDto: UpdateTagDto) {
+  update(id: string, updateTagDto: UpdateTagDto) {
     return `This action updates a #${id} tag`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} tag`;
   }
 }

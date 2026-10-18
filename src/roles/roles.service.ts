@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto.js';
 import { UpdateRoleDto } from './dto/update-role.dto.js';
 import { InjectModel } from '@nestjs/mongoose';
@@ -12,7 +12,7 @@ export class RolesService {
     private readonly roleModel: Model<Role>,
   ) {}
 
-  create(createRoleDto: CreateRoleDto) {
+  async create(createRoleDto: CreateRoleDto) {
     return this.roleModel.create({
       ...createRoleDto,
       createdAt: new Date(),
@@ -21,19 +21,26 @@ export class RolesService {
     });
   }
 
-  findAll() {
-    return `This action returns all roles`;
+  async findAll() {
+    return this.roleModel
+      .find({ isDeleted: false })
+      .populate('permissions')
+      .exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} role`;
+  async findOne(id: string) {
+    const role = await this.roleModel.findById(id);
+    if (!role || role.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+    return role;
   }
 
-  update(id: number, updateRoleDto: UpdateRoleDto) {
+  update(id: string, updateRoleDto: UpdateRoleDto) {
     return `This action updates a #${id} role`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} role`;
   }
 }

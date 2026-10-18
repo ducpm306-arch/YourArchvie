@@ -19,16 +19,16 @@ export class FoldersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.foldersService.findOne(+id);
+    return this.foldersService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateFolderDto: UpdateFolderDto) {
-    return this.foldersService.update(+id, updateFolderDto);
+    return this.foldersService.update(id, updateFolderDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.foldersService.remove(+id);
+    return this.foldersService.remove(id);
   }
 }

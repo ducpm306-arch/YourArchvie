@@ -1,10 +1,4 @@
-import {
-  IsBoolean,
-  IsDateString,
-  IsMongoId,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class CreateTagDto {
   @IsString()

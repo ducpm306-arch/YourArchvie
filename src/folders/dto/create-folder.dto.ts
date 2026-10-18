@@ -1,4 +1,4 @@
-import { IsArray, IsMongoId, IsString } from 'class-validator';
+import { IsMongoId, IsOptional, IsString } from 'class-validator';
 
 export class CreateFolderDto {
   @IsString()
@@ -7,11 +7,10 @@ export class CreateFolderDto {
   @IsString()
   description: string;
 
-  @IsArray()
-  @IsMongoId({ each: true })
+  @IsMongoId()
   project: string;
 
-  @IsArray()
-  @IsMongoId({ each: true })
-  parent: string;
+  @IsOptional()
+  @IsMongoId()
+  parent?: string;
 }

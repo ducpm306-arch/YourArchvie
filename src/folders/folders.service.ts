@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFolderDto } from './dto/create-folder.dto.js';
 import { UpdateFolderDto } from './dto/update-folder.dto.js';
 import { InjectModel } from '@nestjs/mongoose';
@@ -8,11 +8,11 @@ import { Model } from 'mongoose';
 @Injectable()
 export class FoldersService {
   constructor(
-    @InjectModel(Folder.name) private readonly foldetModel: Model<Folder>,
+    @InjectModel(Folder.name) private readonly folderModel: Model<Folder>,
   ) {}
 
   create(createFolderDto: CreateFolderDto) {
-    return this.foldetModel.create({
+    return this.folderModel.create({
       ...createFolderDto,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -21,18 +21,25 @@ export class FoldersService {
   }
 
   findAll() {
-    return `This action returns all folders`;
+    return this.folderModel
+      .find({ isDeleted: false })
+      .populate('parent')
+      .exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} folder`;
+  async findOne(id: string) {
+    const folder = await this.folderModel.findById(id);
+    if (!folder || folder.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+    return folder;
   }
 
-  update(id: number, updateFolderDto: UpdateFolderDto) {
+  update(id: string, updateFolderDto: UpdateFolderDto) {
     return `This action updates a #${id} folder`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} folder`;
   }
 }

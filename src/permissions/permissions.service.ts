@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePermissionDto } from './dto/create-permission.dto.js';
 import { UpdatePermissionDto } from './dto/update-permission.dto.js';
 import { InjectModel } from '@nestjs/mongoose';
@@ -12,7 +12,7 @@ export class PermissionsService {
     private readonly permissionModel: Model<Permission>,
   ) {}
 
-  create(createPermissionDto: CreatePermissionDto) {
+  async create(createPermissionDto: CreatePermissionDto) {
     return this.permissionModel.create({
       ...createPermissionDto,
       createdAt: new Date(),
@@ -21,19 +21,23 @@ export class PermissionsService {
     });
   }
 
-  findAll() {
-    return `This action returns all permissions`;
+  async findAll() {
+    return this.permissionModel.find({ isDeleted: false }).exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} permission`;
+  async findOne(id: string) {
+    const permission = await this.permissionModel.findById(id);
+    if (!permission || permission.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+    return permission;
   }
 
-  update(id: number, updatePermissionDto: UpdatePermissionDto) {
+  update(id: string, updatePermissionDto: UpdatePermissionDto) {
     return `This action updates a #${id} permission`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} permission`;
   }
 }

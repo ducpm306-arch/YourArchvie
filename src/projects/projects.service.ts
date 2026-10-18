@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProjectDto } from './dto/create-project.dto.js';
 import { UpdateProjectDto } from './dto/update-project.dto.js';
 import { InjectModel } from '@nestjs/mongoose';
@@ -12,7 +12,7 @@ export class ProjectsService {
     private readonly projectModel: Model<Project>,
   ) {}
 
-  create(createProjectDto: CreateProjectDto) {
+  async create(createProjectDto: CreateProjectDto) {
     return this.projectModel.create({
       ...createProjectDto,
       createdAt: new Date(),
@@ -21,19 +21,26 @@ export class ProjectsService {
     });
   }
 
-  findAll() {
-    return `This action returns all projects`;
+  async findAll() {
+    return this.projectModel
+      .find({ isDeleted: false })
+      .populate('owner')
+      .exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} project`;
+  async findOne(id: string) {
+    const project = await this.projectModel.findById(id);
+    if (!project || project.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+    return project;
   }
 
-  update(id: number, updateProjectDto: UpdateProjectDto) {
+  update(id: string, updateProjectDto: UpdateProjectDto) {
     return `This action updates a #${id} project`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} project`;
   }
 }

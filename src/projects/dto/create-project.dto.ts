@@ -1,4 +1,4 @@
-import { IsArray, IsMongoId, IsString } from 'class-validator';
+import { IsMongoId, IsString } from 'class-validator';
 
 export class CreateProjectDto {
   @IsString()
@@ -7,7 +7,6 @@ export class CreateProjectDto {
   @IsString()
   description: string;
 
-  @IsArray()
-  @IsMongoId({ each: true })
+  @IsMongoId()
   owner: string;
 }

@@ -1,4 +1,4 @@
-import { IsArray, IsMongoId, IsOptional, IsString } from 'class-validator';
+import { IsMongoId, IsOptional, IsString } from 'class-validator';
 
 export class CreateDocumentDto {
   @IsString()
@@ -14,19 +14,16 @@ export class CreateDocumentDto {
   type: string;
 
   @IsOptional()
-  @IsArray()
-  @IsMongoId({ each: true })
-  tag: string;
+  @IsMongoId()
+  tag?: string;
 
   @IsString()
   thumbail: string;
 
-  @IsArray()
-  @IsMongoId({ each: true })
+  @IsMongoId()
   project: string;
 
   @IsOptional()
-  @IsArray()
-  @IsMongoId({ each: true })
-  folder: string;
+  @IsMongoId()
+  folder?: string;
 }

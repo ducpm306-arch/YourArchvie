@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDocumentDto } from './dto/create-document.dto.js';
 import { UpdateDocumentDto } from './dto/update-document.dto.js';
 import { InjectModel } from '@nestjs/mongoose';
@@ -21,18 +21,25 @@ export class DocumentsService {
   }
 
   findAll() {
-    return `This action returns all documents`;
+    return this.documentModel
+      .find({ isDeleted: false })
+      .populate('tag', 'folder')
+      .exec();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} document`;
+  async findOne(id: string) {
+    const document = await this.documentModel.findById(id);
+    if (!document || document.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+    return document;
   }
 
-  update(id: number, updateDocumentDto: UpdateDocumentDto) {
+  update(id: string, updateDocumentDto: UpdateDocumentDto) {
     return `This action updates a #${id} document`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} document`;
   }
 }

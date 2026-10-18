@@ -3,7 +3,6 @@ import {
   IsString,
   IsMongoId,
   IsOptional,
-  IsArray,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -18,9 +17,8 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  avatar: string;
+  avatar?: string;
 
-  @IsArray()
-  @IsMongoId({ each: true })
+  @IsMongoId()
   role: string;
 }
