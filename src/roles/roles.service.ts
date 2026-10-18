@@ -1,11 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto.js';
 import { UpdateRoleDto } from './dto/update-role.dto.js';
+import { InjectModel } from '@nestjs/mongoose';
+import { Role } from './entities/role.entity.js';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class RolesService {
+  constructor(
+    @InjectModel(Role.name)
+    private readonly roleModel: Model<Role>,
+  ) {}
+
   create(createRoleDto: CreateRoleDto) {
-    return 'This action adds a new role';
+    return this.roleModel.create({
+      ...createRoleDto,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isDeleted: false,
+    });
   }
 
   findAll() {

@@ -1,11 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProjectDto } from './dto/create-project.dto.js';
 import { UpdateProjectDto } from './dto/update-project.dto.js';
+import { InjectModel } from '@nestjs/mongoose';
+import { Project } from './entities/project.entity.js';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class ProjectsService {
+  constructor(
+    @InjectModel(Project.name)
+    private readonly projectModel: Model<Project>,
+  ) {}
+
   create(createProjectDto: CreateProjectDto) {
-    return 'This action adds a new project';
+    return this.projectModel.create({
+      ...createProjectDto,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isDeleted: false,
+    });
   }
 
   findAll() {

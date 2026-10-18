@@ -1,11 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { CreateFolderDto } from './dto/create-folder.dto.js';
 import { UpdateFolderDto } from './dto/update-folder.dto.js';
+import { InjectModel } from '@nestjs/mongoose';
+import { Folder } from './entities/folder.entity.js';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class FoldersService {
+  constructor(
+    @InjectModel(Folder.name) private readonly foldetModel: Model<Folder>,
+  ) {}
+
   create(createFolderDto: CreateFolderDto) {
-    return 'This action adds a new folder';
+    return this.foldetModel.create({
+      ...createFolderDto,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isDeleted: false,
+    });
   }
 
   findAll() {

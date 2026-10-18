@@ -1,11 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { CreateDocumentDto } from './dto/create-document.dto.js';
 import { UpdateDocumentDto } from './dto/update-document.dto.js';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Document } from './entities/document.entity.js';
 
 @Injectable()
 export class DocumentsService {
+  constructor(
+    @InjectModel(Document.name) private readonly documentModel: Model<Document>,
+  ) {}
+
   create(createDocumentDto: CreateDocumentDto) {
-    return 'This action adds a new document';
+    return this.documentModel.create({
+      ...createDocumentDto,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isDeleted: false,
+    });
   }
 
   findAll() {
