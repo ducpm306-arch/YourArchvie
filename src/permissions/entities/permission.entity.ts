@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 export type PermissionDocument = mongoose.HydratedDocument<Permission>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Permission {
   @Prop()
   name: string;

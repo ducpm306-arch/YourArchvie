@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 export type FolderDocument = mongoose.HydratedDocument<Folder>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Folder {
   @Prop()
   name: string;

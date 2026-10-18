@@ -15,8 +15,6 @@ export class RolesService {
   async create(createRoleDto: CreateRoleDto) {
     return this.roleModel.create({
       ...createRoleDto,
-      createdAt: new Date(),
-      updatedAt: new Date(),
       isDeleted: false,
     });
   }
@@ -36,11 +34,36 @@ export class RolesService {
     return role;
   }
 
-  update(id: string, updateRoleDto: UpdateRoleDto) {
-    return `This action updates a #${id} role`;
+  async update(id: string, updateRoleDto: UpdateRoleDto) {
+    const role = await this.roleModel
+      .findByIdAndUpdate(
+        id,
+        updateRoleDto,
+        { new: true, runValidators: true },
+      )
+      .populate('permissions')
+      .exec();
+    if (!role || role.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+    return role;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} role`;
+  async remove(id: string) {
+    await this.findOne(id);
+
+    const role = await this.roleModel
+      .findByIdAndUpdate(
+        id,
+        { isDeleted: true, deletedAt: new Date() },
+        { new: true, runValidators: true },
+      )
+      .exec();
+
+    if (!role) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+
+    return role;
   }
 }

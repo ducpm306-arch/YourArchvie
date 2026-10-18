@@ -15,8 +15,6 @@ export class ProjectsService {
   async create(createProjectDto: CreateProjectDto) {
     return this.projectModel.create({
       ...createProjectDto,
-      createdAt: new Date(),
-      updatedAt: new Date(),
       isDeleted: false,
     });
   }
@@ -36,11 +34,37 @@ export class ProjectsService {
     return project;
   }
 
-  update(id: string, updateProjectDto: UpdateProjectDto) {
-    return `This action updates a #${id} project`;
+  async update(id: string, updateProjectDto: UpdateProjectDto) {
+    const project = await this.projectModel
+      .findByIdAndUpdate(
+        id,
+        updateProjectDto,
+        { new: true, runValidators: true },
+      )
+      .populate('owner')
+      .exec();
+
+    if (!project || project.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+    return project;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} project`;
+  async remove(id: string) {
+    await this.findOne(id);
+
+    const project = await this.projectModel
+      .findByIdAndUpdate(
+        id,
+        { isDeleted: true, deletedAt: new Date() },
+        { new: true, runValidators: true },
+      )
+      .exec();
+
+    if (!project) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+
+    return project;
   }
 }

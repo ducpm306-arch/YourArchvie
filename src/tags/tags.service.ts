@@ -4,7 +4,6 @@ import { UpdateTagDto } from './dto/update-tag.dto.js';
 import { InjectModel } from '@nestjs/mongoose';
 import { Tag } from './entities/tag.entity.js';
 import { Model } from 'mongoose';
-import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class TagsService {
@@ -16,8 +15,6 @@ export class TagsService {
   async create(createTagDto: CreateTagDto) {
     return this.tagModel.create({
       ...createTagDto,
-      createdAt: new Date(),
-      updatedAt: new Date(),
       isDeleted: false,
     });
   }
@@ -28,17 +25,43 @@ export class TagsService {
 
   async findOne(id: string) {
     const tag = await this.tagModel.findById(id);
-    if (!tag || tag.isDeleted) {
+    if (!tag) {
       throw new NotFoundException('Không tìm thấy dữ liệu');
     }
     return tag;
   }
 
-  update(id: string, updateTagDto: UpdateTagDto) {
-    return `This action updates a #${id} tag`;
+  async update(id: string, updateTagDto: UpdateTagDto) {
+    const tag = await this.tagModel
+      .findByIdAndUpdate(
+        id,
+        updateTagDto,
+        { new: true, runValidators: true },
+      )
+      .exec();
+
+    if (!tag || tag.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+
+    return tag;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} tag`;
+  async remove(id: string) {
+    await this.findOne(id);
+
+    const tag = await this.tagModel
+      .findByIdAndUpdate(
+        id,
+        { isDeleted: true, deletedAt: new Date() },
+        { new: true, runValidators: true },
+      )
+      .exec();
+
+    if (!tag || tag.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+
+    return tag;
   }
 }

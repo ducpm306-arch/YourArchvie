@@ -15,8 +15,6 @@ export class PermissionsService {
   async create(createPermissionDto: CreatePermissionDto) {
     return this.permissionModel.create({
       ...createPermissionDto,
-      createdAt: new Date(),
-      updatedAt: new Date(),
       isDeleted: false,
     });
   }
@@ -33,11 +31,35 @@ export class PermissionsService {
     return permission;
   }
 
-  update(id: string, updatePermissionDto: UpdatePermissionDto) {
-    return `This action updates a #${id} permission`;
+  async update(id: string, updatePermissionDto: UpdatePermissionDto) {
+    const permission = await this.permissionModel
+      .findByIdAndUpdate(
+        id,
+        updatePermissionDto,
+        { new: true, runValidators: true },
+      )
+      .exec();
+    if (!permission || permission.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+    return permission;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} permission`;
+  async remove(id: string) {
+    await this.findOne(id);
+
+    const permission = await this.permissionModel
+      .findByIdAndUpdate(
+        id,
+        { isDeleted: true, deletedAt: new Date() },
+        { new: true, runValidators: true },
+      )
+      .exec();
+
+    if (!permission) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+
+    return permission;
   }
 }

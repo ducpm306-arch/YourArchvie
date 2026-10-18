@@ -14,8 +14,6 @@ export class DocumentsService {
   create(createDocumentDto: CreateDocumentDto) {
     return this.documentModel.create({
       ...createDocumentDto,
-      createdAt: new Date(),
-      updatedAt: new Date(),
       isDeleted: false,
     });
   }
@@ -23,7 +21,7 @@ export class DocumentsService {
   findAll() {
     return this.documentModel
       .find({ isDeleted: false })
-      .populate('tag', 'folder')
+      .populate('tag', 'document')
       .exec();
   }
 
@@ -35,11 +33,36 @@ export class DocumentsService {
     return document;
   }
 
-  update(id: string, updateDocumentDto: UpdateDocumentDto) {
-    return `This action updates a #${id} document`;
+  async update(id: string, updateDocumentDto: UpdateDocumentDto) {
+    const document = await this.documentModel
+      .findByIdAndUpdate(
+        id,
+        updateDocumentDto,
+        { new: true, runValidators: true },
+      )
+      .populate('tag', 'document')
+      .exec();
+    if (!document || document.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+    return document;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} document`;
+  async remove(id: string) {
+    await this.findOne(id);
+
+    const document = await this.documentModel
+      .findByIdAndUpdate(
+        id,
+        { isDeleted: true, deletedAt: new Date() },
+        { new: true, runValidators: true },
+      )
+      .exec();
+
+    if (!document) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+
+    return document;
   }
 }

@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 export type UserDocument = mongoose.HydratedDocument<User>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
   @Prop()
   name: string;

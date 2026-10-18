@@ -14,8 +14,6 @@ export class FoldersService {
   create(createFolderDto: CreateFolderDto) {
     return this.folderModel.create({
       ...createFolderDto,
-      createdAt: new Date(),
-      updatedAt: new Date(),
       isDeleted: false,
     });
   }
@@ -35,11 +33,36 @@ export class FoldersService {
     return folder;
   }
 
-  update(id: string, updateFolderDto: UpdateFolderDto) {
-    return `This action updates a #${id} folder`;
+  async update(id: string, updateFolderDto: UpdateFolderDto) {
+    const folder = await this.folderModel
+      .findByIdAndUpdate(
+        id,
+        updateFolderDto,
+        { new: true, runValidators: true },
+      )
+      .populate('parent')
+      .exec();
+    if (!folder || folder.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+    return folder;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} folder`;
+  async remove(id: string) {
+    await this.findOne(id);
+
+    const folder = await this.folderModel
+      .findByIdAndUpdate(
+        id,
+        { isDeleted: true, deletedAt: new Date() },
+        { new: true, runValidators: true },
+      )
+      .exec();
+
+    if (!folder) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+
+    return folder;
   }
 }

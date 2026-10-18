@@ -15,8 +15,6 @@ export class UsersService {
   async create(createUserDto: CreateUserDto) {
     return this.userModel.create({
       ...createUserDto,
-      createdAt: new Date(),
-      updatedAt: new Date(),
       isDeleted: false,
     });
   }
@@ -33,11 +31,38 @@ export class UsersService {
     return user;
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.userModel
+      .findByIdAndUpdate(
+        id,
+        updateUserDto,
+        { new: true, runValidators: true },
+      )
+      .populate('role')
+      .exec();
+
+    if (!user || user.isDeleted) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+
+    return user;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    await this.findOne(id);
+
+    const user = await this.userModel
+      .findByIdAndUpdate(
+        id,
+        { isDeleted: true, deletedAt: new Date() },
+        { new: true, runValidators: true },
+      )
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy dữ liệu');
+    }
+
+    return user;
   }
 }
